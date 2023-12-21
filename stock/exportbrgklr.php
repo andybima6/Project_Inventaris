@@ -62,7 +62,7 @@
 												
 												<tr>
 													<td><?php echo $no++ ?></td>
-													<td><?php $tanggals=$b['tgl']; echo date("d-M-Y", strtotime($tanggals)) ?></td>
+													<td><?php $tanggals=$b['tgl']; echo $tanggals->format('d-M-Y') ?></td>
 													<td><?php echo $b['nama'] ?></td>
 													<td><?php echo $b['jenis'] ?></td>
 													<td><?php echo $b['merk'] ?></td>

@@ -72,6 +72,7 @@
                                 <ul class="collapse">
                                     <li><a href="masuk.php">Barang Masuk / Kembali</a></li>
                                     <li><a href="keluar.php">Barang Keluar</a></li>
+                                    <li><a href="detail.php">Detail</a></li>
                                 </ul>
                             </li>
                             <li>

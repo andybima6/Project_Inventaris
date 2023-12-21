@@ -225,7 +225,7 @@ function formatDateTime($dateTime)
                                         </tbody>
                                     </table>
                                 </div>
-                                <a href="exportdetail.php.php" target="_blank" class="btn btn-info">Export Data</a>
+                                <a href="exportdetail.php" target="_blank" class="btn btn-info">Export Data</a>
                             </div>
                         </div>
                     </div>
