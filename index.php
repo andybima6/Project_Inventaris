@@ -61,6 +61,39 @@ if (isset($_POST['btn-login'])) {
 	sqlsrv_free_stmt($stmt);
 	sqlsrv_close($koneksi);
 }
+
+if (isset($_POST['btn-register'])) {
+	$uname = $_POST['username'];
+	$upass = $_POST['password'];
+
+	// Ensure $conn is a valid database connection
+	if (!$koneksi) {
+		die(print_r(sqlsrv_errors(), true));
+	}
+
+	// Use prepared statement to prevent SQL injection
+	$sql = "INSERT INTO slogin (username, password, role) VALUES (?, ?, ?)";
+	$params = array($uname, md5($upass), "stock");
+	$options = array("Scrollable" => SQLSRV_CURSOR_KEYSET);
+	$stmt = sqlsrv_query($koneksi, $sql, $params, $options);
+
+	// Check if the query was successful
+	if ($stmt === false) {
+		die(print_r(sqlsrv_errors(), true));
+	}
+
+	// Check if the registration was successful
+	if (sqlsrv_rows_affected($stmt) > 0) {
+		// Redirect to login page or any other page as needed
+		header("location:index.php?pesan=registrasi_sukses");
+	} else {
+		header("location:index.php?pesan=registrasi_gagal");
+	}
+
+	sqlsrv_free_stmt($stmt);
+	sqlsrv_close($koneksi);
+}
+
 ?>
 
 
@@ -128,6 +161,11 @@ if (isset($_POST['btn-login'])) {
 					<input type="password" class="form-control" placeholder="Password" name="password">
 				</div>
 				<button type="submit" class="btn btn-primary" name="btn-login">Masuk</button>
+
+
+				<!-- Menggunakan elemen <button> dengan skrip JavaScript -->
+				<button type="button" class="btn btn-primary" onclick="window.location.href='register.php'">Register</button>
+
 
 			</form>
 

@@ -5,12 +5,16 @@ $qty=$_POST['qty'];
 $tanggal=$_POST['tanggal'];
 $ket=$_POST['ket'];
 
+
 $dt=sqlsrv_query($koneksi,"select * from sstock_brg where idx='$barang'");
 $data=sqlsrv_fetch_array($dt);
 $sisa=$data['stock']+$qty;
 $query1 = sqlsrv_query($koneksi,"update sstock_brg set stock='$sisa' where idx='$barang'");
 
 $query2 = sqlsrv_query($koneksi,"insert into sbrg_masuk (idx,tgl,jumlah,keterangan) values('$barang','$tanggal','$qty','$ket')");
+
+
+$query3 = sqlsrv_query($koneksi,"insert into history_table (tgl,tindakan,jumlah,keterangan) values(getdate(),'masuk data','$qty','$ket')");
 
 if($query1 && $query2){
     echo " <div class='alert alert-success'>

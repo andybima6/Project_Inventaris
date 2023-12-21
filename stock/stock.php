@@ -11,10 +11,13 @@ if (isset($_POST['update'])) {
     $jenis = $_POST['jenis'];
     $merk = $_POST['merk'];
     $ukuran = $_POST['ukuran'];
+    $stock = $_POST['stock'];
     $satuan = $_POST['satuan'];
     $lokasi = $_POST['lokasi'];
 
     $updatedata = sqlsrv_query($koneksi, "update sstock_brg set nama='$nama', jenis='$jenis', merk='$merk', ukuran='$ukuran', satuan='$satuan', lokasi='$lokasi' where idx='$idx'");
+    // Fix the syntax error in the INSERT query
+    $update1 = sqlsrv_query($koneksi, "INSERT INTO history_table (tgl, tindakan, jumlah, keterangan) VALUES (GETDATE(), 'update barang stock', '$stock', '$barang')");
 
     //cek apakah berhasil
     if ($updatedata) {
@@ -34,10 +37,20 @@ if (isset($_POST['update'])) {
 if (isset($_POST['hapus'])) {
     $idx = $_POST['idbrg'];
 
-    $delete = sqlsrv_query($koneksi, "delete from sstock_brg where idx='$idx'");
-    //hapus juga semua data barang ini di tabel keluar-masuk
-    $deltabelkeluar = sqlsrv_query($koneksi, "delete from sbrg_keluar where id='$idx'");
-    $deltabelmasuk = sqlsrv_query($koneksi, "delete from sbrg_masuk where id='$idx'");
+    // Fetch the current stock value before deleting the record
+    $getStockQuery = sqlsrv_query($koneksi, "SELECT stock FROM sstock_brg WHERE idx='$idx'");
+    $stockRow = sqlsrv_fetch_array($getStockQuery);
+    $stock = $stockRow['stock'];
+
+    // Delete the record from sstock_brg
+    $delete = sqlsrv_query($koneksi, "DELETE FROM sstock_brg WHERE idx='$idx'");
+
+    // Delete related records from sbrg_keluar and sbrg_masuk
+    $deltabelkeluar = sqlsrv_query($koneksi, "DELETE FROM sbrg_keluar WHERE id='$idx'");
+    $deltabelmasuk = sqlsrv_query($koneksi, "DELETE FROM sbrg_masuk WHERE id='$idx'");
+
+    // Insert the deletion into history_table with the correct stock value
+    $delet1 = sqlsrv_query($koneksi, "INSERT INTO history_table (tgl, tindakan, jumlah, keterangan) VALUES (GETDATE(), 'hapus barang stock', '$stock', '$nama')");
 
     //cek apakah berhasil
     if ($delete && $deltabelkeluar && $deltabelmasuk) {
@@ -100,6 +113,7 @@ if (isset($_POST['hapus'])) {
 </head>
 <?php
 ?>
+
 <body>
     <!--[if lt IE 8]>
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
@@ -114,7 +128,7 @@ if (isset($_POST['hapus'])) {
         <!-- sidebar menu area start -->
         <div class="sidebar-menu">
             <div class="sidebar-header">
-            <p href="index.php" style="align-items :center; font-size : 30px; color : white; font-family: 'Arial', sans-serif;">Inventory Andy</p>
+                <p href="index.php" style="align-items :center; font-size : 30px; color : white; font-family: 'Arial', sans-serif;">Inventory Andy</p>
             </div>
             <div class="main-menu">
                 <div class="menu-inner">
@@ -130,6 +144,7 @@ if (isset($_POST['hapus'])) {
                                 <ul class="collapse">
                                     <li><a href="masuk.php">Barang Masuk / Kembali</a></li>
                                     <li><a href="keluar.php">Barang Keluar</a></li>
+                                    <li><a href="detail.php">Detail </a></li>
                                 </ul>
                             </li>
                             <li>
@@ -440,6 +455,7 @@ if (isset($_POST['hapus'])) {
     </div>
 
     <script>
+        //: Membatasi Input Huruf Kapital di Awal Input
         $(document).ready(function() {
             $('input').on('keydown', function(event) {
                 if (this.selectionStart == 0 && event.keyCode >= 65 && event.keyCode <= 90 && !(event.shiftKey) && !(event.ctrlKey) && !(event.metaKey) && !(event.altKey)) {
@@ -451,13 +467,11 @@ if (isset($_POST['hapus'])) {
                 }
             });
         });
-
+        //Mengaktifkan DataTables dengan Button Print
         $(document).ready(function() {
             $('#dataTable3').DataTable({
                 dom: 'Bfrtip',
-                buttons: [
-                    'print'
-                ]
+                buttons: ['print']
             });
         });
     </script>

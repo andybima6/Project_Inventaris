@@ -86,7 +86,8 @@ CREATE TABLE [dbo].[slogin] (
 --
 SET IDENTITY_INSERT [dbo].[slogin] ON;
 INSERT INTO [dbo].[slogin] ([id], [username], [password], [nickname], [role]) VALUES
-(7, 'guest', '084e0343a0486ff05530df6c705c8bb4', 'Stock', 'stock');
+(7, 'guest', '084e0343a0486ff05530df6c705c8bb4', 'Stock', 'stock'),
+(19, 'andy', '084e0343a0486ff05530df6c705c8bb4', 'andy', 'andy');
 SET IDENTITY_INSERT [dbo].[slogin] OFF;
 
 -- --------------------------------------------------------

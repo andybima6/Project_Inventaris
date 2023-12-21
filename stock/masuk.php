@@ -10,7 +10,8 @@
         $idx = $_POST['idx']; //idbarang
         $jumlah = $_POST['jumlah'];
         $keterangan = $_POST['keterangan'];
-        $tanggal = $_POST['tanggal'];
+        $tanggal = $_POST['tanggal']; 
+     
 
         $lihatstock = sqlsrv_query($koneksi,"select * from sstock_brg where idx='$idx'"); //lihat stock barang itu saat ini
         $stocknya = sqlsrv_fetch_array($lihatstock); //ambil datanya
@@ -22,15 +23,18 @@
 
         if($jumlah >= $qtyskrg){
             //ternyata inputan baru lebih besar jumlah masuknya, maka tambahi lagi stock barang
-            $hitungselisih = $jumlah-$qtyskrg;
-            $tambahistock = $stockskrg+$hitungselisih;
-
-            $queryx = sqlsrv_query($koneksi,"update sstock_brg set stock='$tambahistock' where idx='$idx'");
-            $updatedata1 = sqlsrv_query($koneksi,"update sbrg_masuk set tgl='$tanggal',jumlah='$jumlah',keterangan='$keterangan' where id='$id'");
+            $hitungselisih = $jumlah - $qtyskrg;
+            $tambahistock = $stockskrg + $hitungselisih;
+            
+            $queryx = sqlsrv_query($koneksi, "UPDATE sstock_brg SET stock='$tambahistock' WHERE idx='$idx'");
+            $updatedata1 = sqlsrv_query($koneksi, "UPDATE sbrg_masuk SET tgl='$tanggal', jumlah='$jumlah', keterangan='$keterangan' WHERE id='$id'");
+            
+            // Fix the syntax error in the INSERT query
+            $update1 = sqlsrv_query($koneksi, "INSERT INTO history_table (tgl, tindakan, jumlah, keterangan) VALUES (GETDATE(), 'update barang masuk', '$jumlah', '$keterangan')");
             
             //cek apakah berhasil
             if ($updatedata1 && $queryx){
-
+               
                 echo " <div class='alert alert-success'>
                     <strong>Success!</strong> Redirecting you back in 1 seconds.
                 </div>
@@ -48,8 +52,7 @@
 
             $query1 = sqlsrv_query($koneksi,"update sstock_brg set stock='$kurangistock' where idx='$idx'");
 
-            $updatedata = sqlsrv_query($koneksi,"update sbrg_masuk set tgl='$tanggal', jumlah='$jumlah', keterangan='$keterangan' where id='$id'");
-            
+          
             //cek apakah berhasil
             if ($query1 && $updatedata){
 
@@ -83,8 +86,14 @@
 
         $adjuststock = $stockskrg-$qtyskrg;
 
+    
         $queryx = sqlsrv_query($koneksi,"update sstock_brg set stock='$adjuststock' where idx='$idx'");
+        $select = sqlsrv_query($koneksi,"select * from sbrg_masuk where id='$id'");
+        $delet1 = sqlsrv_query($koneksi, "insert into history_table (tgl,tindakan,jumlah,keterangan) values(getdate(),'hapus barang masuk','$qtyskrg','$keterangan')");
+
         $del = sqlsrv_query($koneksi,"delete from sbrg_masuk where id='$id'");
+        
+       
 
         
         //cek apakah berhasil
@@ -175,6 +184,7 @@
                                 <ul class="active">
                                     <li class="active"><a href="masuk.php">Barang Masuk / Kembali</a></li>
                                     <li><a href="keluar.php">Barang Keluar</a></li>
+                                    <li><a href="detail.php">Detail </a></li>
                                 </ul>
                             </li>
                             <li>

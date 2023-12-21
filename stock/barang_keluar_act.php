@@ -13,6 +13,7 @@ $query1 = sqlsrv_query($koneksi,"update sstock_brg set stock='$sisa' where idx='
 
 $query2 = sqlsrv_query($koneksi,"insert into sbrg_keluar (idx,tgl,jumlah,penerima,keterangan) values('$barang','$tanggal','$qty','$penerima','$ket')");
 
+$query3 = sqlsrv_query($koneksi,"insert into history_table (tgl,tindakan,jumlah,keterangan) values(getdate(),'keluar data','$qty','$ket')");
 if($query1 && $query2){
     echo " <div class='alert alert-success'>
     <strong>Success!</strong> Redirecting you back in 1 seconds.

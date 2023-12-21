@@ -23,11 +23,14 @@
 
         if($jumlah >= $qtyskrg){
             //ternyata inputan baru lebih besar jumlah keluarnya, maka kurangi lagi stock barang
-            $hitungselisih = $jumlah-$qtyskrg;
-            $kurangistock = $stockskrg-$hitungselisih;
-
-            $queryx = sqlsrv_query($koneksi,"update sstock_brg set stock='$kurangistock' where idx='$idx'");
-            $updatedata1 = sqlsrv_query($koneksi,"update sbrg_keluar set tgl='$tanggal',jumlah='$jumlah',penerima='$penerima',keterangan='$keterangan' where id='$id'");
+            $hitungselisih = $jumlah - $qtyskrg;
+            $kurangistock = $stockskrg - $hitungselisih;
+            
+            $queryx = sqlsrv_query($koneksi, "UPDATE sstock_brg SET stock='$kurangistock' WHERE idx='$idx'");
+            $updatedata1 = sqlsrv_query($koneksi, "UPDATE sbrg_keluar SET tgl='$tanggal', jumlah='$jumlah', penerima='$penerima', keterangan='$keterangan' WHERE id='$id'");
+            
+            // Fix the syntax error in the INSERT query
+            $update1 = sqlsrv_query($koneksi, "INSERT INTO history_table (tgl, tindakan, jumlah, keterangan) VALUES (GETDATE(), 'update barang keluar', '$jumlah', '$keterangan')");
             
             //cek apakah berhasil
             if ($updatedata1 && $queryx){
@@ -41,14 +44,13 @@
                 </div>
                 <meta http-equiv='refresh' content='3; url= keluar.php'/> ";
                 };
-
+            
         } else {
             //ternyata inputan baru lebih kecil jumlah keluarnya, maka tambahi lagi stock barang
             $hitungselisih = $qtyskrg-$jumlah;
             $tambahistock = $stockskrg+$hitungselisih;
 
             $query1 = sqlsrv_query($koneksi,"update sstock_brg set stock='$tambahistock' where idx='$idx'");
-
             $updatedata = sqlsrv_query($koneksi,"update sbrg_keluar set tgl='$tanggal', jumlah='$jumlah', penerima='$penerima', keterangan='$keterangan' where id='$id'");
             
             //cek apakah berhasil
@@ -73,20 +75,22 @@
     if(isset($_POST['hapus'])){
         $id = $_POST['id'];
         $idx = $_POST['idx'];
-
-        $lihatstock = sqlsrv_query($koneksi,"select * from sstock_brg where idx='$idx'"); //lihat stock barang itu saat ini
-        $stocknya = sqlsrv_fetch_array($lihatstock); //ambil datanya
-        $stockskrg = $stocknya['stock'];//jumlah stocknya skrg
-
-        $lihatdataskrg = sqlsrv_query($koneksi,"select * from sbrg_keluar where id='$id'"); //lihat qty saat ini
-        $preqtyskrg = sqlsrv_fetch_array($lihatdataskrg); 
-        $qtyskrg = $preqtyskrg['jumlah'];//jumlah skrg
-
-        $adjuststock = $stockskrg+$qtyskrg;
-
-        $queryx = sqlsrv_query($koneksi,"update sstock_brg set stock='$adjuststock' where idx='$idx'");
-        $del = sqlsrv_query($koneksi,"delete from sbrg_keluar where id='$id'");
-
+        $lihatstock = sqlsrv_query($koneksi, "SELECT * FROM sstock_brg WHERE idx='$idx'");
+        $stocknya = sqlsrv_fetch_array($lihatstock);
+        $stockskrg = $stocknya['stock'];
+        
+        $lihatdataskrg = sqlsrv_query($koneksi, "SELECT * FROM sbrg_keluar WHERE id='$id'");
+        $preqtyskrg = sqlsrv_fetch_array($lihatdataskrg);
+        $qtyskrg = $preqtyskrg['jumlah'];
+        
+        $adjuststock = $stockskrg + $qtyskrg;
+        
+        $queryx = sqlsrv_query($koneksi, "UPDATE sstock_brg SET stock='$adjuststock' WHERE idx='$idx'");
+        $del = sqlsrv_query($koneksi, "DELETE FROM sbrg_keluar WHERE id='$id'");
+        
+        // Use $qtyskrg in the history_table query to store the correct quantity
+        $delet1 = sqlsrv_query($koneksi, "INSERT INTO history_table (tgl, tindakan, jumlah, keterangan) VALUES (GETDATE(), 'hapus barang keluar', '$qtyskrg', '$keterangan')");
+        
         
         //cek apakah berhasil
         if ($queryx && $del){
@@ -130,6 +134,7 @@
 	<!-- Global site tag (gtag.js) - Google Analytics -->
 	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-144808195-1"></script>
 	<script>
+        {}
 	  window.dataLayer = window.dataLayer || [];
 	  function gtag(){dataLayer.push(arguments);}
 	  gtag('js', new Date());
@@ -176,6 +181,7 @@
                                 <ul class="active">
                                     <li><a href="masuk.php">Barang Masuk / Kembali</a></li>
                                     <li class="active"><a href="keluar.php">Barang Keluar</a></li>
+                                    <li><a href="detail.php">Detail </a></li>
                                 </ul>
                             </li>
                             <li>
@@ -479,6 +485,7 @@
         ]
     } );
 	} );
+        }
 	</script>
 	
     <!-- jquery latest version -->
@@ -530,6 +537,7 @@
 		});
 	});
 	</script>
+
 </body>
 
 </html>

@@ -1,5 +1,6 @@
 <?php 
 include '../dbconnect.php';
+
 $nama=$_POST['nama'];
 $jenis=$_POST['jenis'];
 $ukuran=$_POST['ukuran'];
@@ -7,20 +8,24 @@ $merk=$_POST['merk'];
 $satuan=$_POST['satuan'];
 $stock=$_POST['stock'];
 $lokasi=$_POST['lokasi'];
-	  
-$query = sqlsrv_query($koneksi,"insert into sstock_brg values(null,'$nama','$jenis','$merk','$ukuran',$stock,'$satuan','$lokasi')");
-if ($query){
+$query = sqlsrv_query($koneksi, "INSERT INTO sstock_brg (nama, jenis, merk, ukuran, stock, satuan, lokasi) VALUES ('$nama', '$jenis', '$merk', '$ukuran', $stock, '$satuan', '$lokasi')");
+$updatedata1 = sqlsrv_query($koneksi, "insert into history_table (tgl,tindakan,jumlah,keterangan) values(getdate(),'tambah stock','$stock','-')");
 
-echo " <div class='alert alert-success'>
-    <strong>Success!</strong> Redirecting you back in 1 seconds.
-  </div>
-<meta http-equiv='refresh' content='1; url= stock.php'/>  ";
-} else { echo "<div class='alert alert-warning'>
-    <strong>Failed!</strong> Redirecting you back in 1 seconds.
-  </div>
- <meta http-equiv='refresh' content='1; url= stock.php'/> ";
+if ($query) {
+  // Berhasil
+  echo "<div class='alert alert-success'>
+          <strong>Success!</strong> Redirecting you back in 1 second.
+        </div>";
+  echo "<meta http-equiv='refresh' content='1; url= stock.php'/>";
+} else {
+  // Gagal
+  echo "<div class='alert alert-warning'>
+          <strong>Failed!</strong> Redirecting you back in 1 second.
+        </div>";
+  echo "<meta http-equiv='refresh' content='1; url= stock.php'/>";
+  die(print_r(sqlsrv_errors(), true));
 }
- 
+
 ?>
  
   <html>
